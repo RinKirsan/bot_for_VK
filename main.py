@@ -2,6 +2,8 @@ import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 import pandas as pd
 
+ad_description = None
+
 # Функция для сохранения данных в таблицу Excel
 def save_to_excel(text, photo_link):
     df = pd.DataFrame({'Text': [text], 'PhotoLink': [photo_link]})
@@ -28,6 +30,20 @@ def handle_command(user_id, command):
     else:
         send_message(user_id, "Неизвестная команда.")
 
+
+# Функция для обработки рекламы
+def handle_advertisement(user_id, event):
+    for event in longpoll.listen():
+        if event.type == VkEventType.MESSAGE_NEW:
+            if event.to_me:
+                if event.attachments['attach1_type'] == 'photo' and event.text:
+                    text = event.text
+                    # Предполагаем, что ссылка на картинку хранится в первой фотографии
+                    photo_link = event.attachments['attach1']
+                    save_to_excel(text, photo_link)
+                    send_message(user_id, "Рекламное объявление сохранено.")
+                    break
+
 # Авторизация в ВКонтакте
 token_file = open('C:\\1\\token.txt')
 vk_session = vk_api.VkApi(token=token_file.read())
@@ -35,17 +51,18 @@ token_file.close()
 vk = vk_session.get_api()
 longpoll = VkLongPoll(vk_session)
 
-# Основной цикл
 for event in longpoll.listen():
-    if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.text:
-        if event.text.lower().startswith('!рек'):
-            command = event.text.lower().split()[1]
-            handle_command(event.user_id, command)
-        else:
-            # Предполагаем, что текст рекламы и картинка отправляются вместе
-            if event.attachments['attach1_type'] == 'photo': #and event.text:
-                text = event.text
-                # Предполагаем, что ссылка на картинку хранится в первой фотографии
-                photo_link = event.attachments['attach1']
-                save_to_excel(text, photo_link)
-                send_message(event.user_id, "Рекламное объявление сохранено.")
+    if event.type == VkEventType.MESSAGE_NEW:
+        if event.to_me:
+
+            msg =event.text.lower()
+            id = event.user_id
+            
+            if msg == '!рек':
+                command = msg.split()[1]
+                handle_command(id, command)
+            elif msg == '!нач':
+                send_message(id, "Введите описание и прикрепите фотографию.\nФотографию и описание следует отправлять вместе, одним сообщением.")
+                handle_advertisement(id, event)
+            elif msg == 'кон':
+                break
