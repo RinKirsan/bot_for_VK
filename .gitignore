@@ -18,3 +18,5 @@ bin-release/
 # information for Eclipse / Flash Builder.
 реклама.xlsx
 site/data.xlsx
+/site/images
+site/new_data.xlsx
