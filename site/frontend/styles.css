@@ -1,0 +1,35 @@
+.container {
+    max-width: 90%;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+}
+
+img {
+    max-width: 20%;
+    height: auto;
+    margin-bottom: 10px;
+	border: 1px solid #ccc; /* Добавление рамки */
+}
+input[type="checkbox"] {
+    width: 20px; /* Устанавливаем ширину чекбокса */
+    height: 20px; /* Устанавливаем высоту чекбокса */
+}
+
+
+
+.item-container {
+    display: flex;
+	flex-direction: row-reverse;
+    align-items: center; /* Выравнивание элементов по центру по вертикали */
+    justify-content: space-between; /* Распределение пространства между элементами */
+	border: 1px solid #ccc; /* Добавление рамки */
+    padding: 10px; /* Добавление отступов внутри рамки */
+}
+
+.item-container img {
+    margin-left: 10px; /* Добавление отступа между текстом и изображением */
+    margin-right: 10px; /* Добавляем отступ между изображением и чекбоксом */
+}
+
+
