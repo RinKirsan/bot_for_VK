@@ -2,6 +2,9 @@ import vk_api
 from vk_api.longpoll import VkLongPoll, VkEventType
 import pandas as pd
 from openpyxl import Workbook, load_workbook
+import os
+import requests
+
 
 # Функция для сохранения данных в таблицу Excel
 def save_to_excel(text, photo_link):
@@ -10,9 +13,33 @@ def save_to_excel(text, photo_link):
     # Определение строки для записи
     row_number = ws.max_row + 1
     ws.cell(row=row_number, column=1).value = text
-    ws.cell(row=row_number, column=2).value = photo_link+'.png'
+    ws.cell(row=row_number, column=2).value = photo_link+'.jpg'
     wb.save('site\data.xlsx')
 
+
+def download_file(url, path):
+    response = requests.get(url)
+    with open(path, "wb") as f:
+        f.write(response.content)
+
+def get_photo_link(photo):
+    max_size = 0
+    max_size_url = ''
+    for size in photo['sizes']:
+        if size['type'] in ['z', 'w'] and size['height'] * size['width'] > max_size:
+            max_size = size['height'] * size['width']
+            max_size_url = size['url']
+    return max_size_url
+        
+def download_photo(text, photo_link, photo, path):
+    url = get_photo_link(photo)
+    if url:
+        filename = os.path.basename(path)
+        current_dir = os.path.dirname(path)
+        extension = os.path.splitext(filename)[1]
+        photo_path = os.path.join(current_dir, 'site\images', f'{photo_link}{extension}')
+        download_file(url, photo_path)
+        save_to_excel(text, photo_link)
 
 
 # Функция для отправки сообщения
@@ -42,15 +69,24 @@ def handle_command(user_id, command):
 # Функция для обработки рекламы
 def handle_advertisement(user_id, event):
     for event in longpoll.listen():
-        if event.type == VkEventType.MESSAGE_NEW:
-            if event.to_me:
-                if event.attachments['attach1_type'] == 'photo' and event.text:
-                    text = event.text
-                    # Предполагаем, что ссылка на картинку хранится в первой фотографии
+        if event.type == VkEventType.MESSAGE_NEW and event.to_me:
+            attachments = vk.messages.getById(message_ids=event.message_id, extended=True, fields='attachments')['items'][0]['attachments']
+            if attachments:
+                attachment = attachments[0]
+                if attachment['type'] == 'photo':
+                    photo = attachment['photo']
                     photo_link = event.attachments['attach1']
-                    save_to_excel(text, photo_link)
-                    send_message(user_id, "Рекламное объявление сохранено.")
+                    #save_to_excel(event.text, photo_link)
+                    download_photo(event.text, photo_link, photo, "photo.jpg")
+                    send_message(user_id, message="Объявление сохранено")
                     break
+                else:
+                    send_message(user_id, "Найдено вложение другого типа")
+                    break
+            else:
+                send_message(user_id, "Вложений не обнаружено.")
+                break
+
 
 
 
@@ -60,6 +96,8 @@ vk_session = vk_api.VkApi(token=token_file.read())
 token_file.close()
 vk = vk_session.get_api()
 longpoll = VkLongPoll(vk_session)
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
 
 def main():
     for event in longpoll.listen():
