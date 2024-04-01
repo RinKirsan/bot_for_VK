@@ -23,3 +23,4 @@ node_modules/
 site/data.xlsx
 /site/images
 site/new_data.xlsx
+site/package-lock.json
