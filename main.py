@@ -5,13 +5,13 @@ from openpyxl import Workbook, load_workbook
 
 # Функция для сохранения данных в таблицу Excel
 def save_to_excel(text, photo_link):
-    wb = load_workbook('реклама.xlsx')
+    wb = load_workbook('site\data.xlsx')
     ws = wb.active
     # Определение строки для записи
     row_number = ws.max_row + 1
     ws.cell(row=row_number, column=1).value = text
-    ws.cell(row=row_number, column=2).value = photo_link
-    wb.save('реклама.xlsx')
+    ws.cell(row=row_number, column=2).value = photo_link+'.png'
+    wb.save('site\data.xlsx')
 
 
 
@@ -27,7 +27,7 @@ def send_message(user_id, message):
 def handle_command(user_id, command):
     try:
         index = int(command)
-        df = pd.read_excel('реклама.xlsx')
+        df = pd.read_excel('site\data.xlsx')
         if not df.empty and index <= len(df):
             text = df.iloc[index - 1]['Text']
             photo_link = df.iloc[index - 1]['PhotoLink']

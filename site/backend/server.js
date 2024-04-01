@@ -79,13 +79,13 @@ app.post('/publish', isAuthenticated, (req, res) => {
 
     // Создание нового workbook
     const newWorkbook = xlsx.utils.book_new();
-    const newSheet = xlsx.utils.aoa_to_sheet([['Image', 'Text']]);
+    const newSheet = xlsx.utils.aoa_to_sheet([[ 'Text' ,'Image']]);
     xlsx.utils.book_append_sheet(newWorkbook, newSheet, 'Sheet1');
 
     // Заполнение нового листа данными
     selectedItems.forEach(item => {
         const { image, text } = item;
-        xlsx.utils.sheet_add_aoa(newSheet, [[image, text]], { origin: -1 });
+        xlsx.utils.sheet_add_aoa(newSheet, [[text, image]], { origin: -1 });
     });
 
     // Сохранение нового файла XLSX
