@@ -71,7 +71,6 @@ def main():
                 
                 if event.text.lower().startswith('!рек'):
                     command = msg.split()[1]
-                    send_message(id,command)
                     handle_command(id, command)
                 elif msg =='!id':
                     send_message(id,id)
