@@ -56,8 +56,8 @@ def handle_command(user_id, command):
         index = int(command)
         df = pd.read_excel('site\data.xlsx')
         if not df.empty and index <= len(df):
-            text = df.iloc[index - 1]['Text']
-            photo_link = df.iloc[index - 1]['PhotoLink']
+            text = df.iloc[index - 1]['text']
+            photo_link = df.iloc[index - 1]['image']
             send_message(user_id, f"Текст рекламы: {text}\nСсылка на картинку: {photo_link}")
         else:
             send_message(user_id, "Указанная строка не найдена.")
@@ -78,6 +78,7 @@ def handle_advertisement(user_id, event):
                     photo_link = event.attachments['attach1']
                     #save_to_excel(event.text, photo_link)
                     download_photo(event.text, photo_link, photo, "photo.jpg")
+                    #download_photo(event.text, photo_link, photo, "photo.png")
                     send_message(user_id, message="Объявление сохранено")
                     break
                 else:
@@ -91,7 +92,7 @@ def handle_advertisement(user_id, event):
 
 
 # Авторизация в ВКонтакте
-token_file = open('C:\\1\\token.txt')
+token_file = open('C:\\1\\token1.txt')
 vk_session = vk_api.VkApi(token=token_file.read())
 token_file.close()
 vk = vk_session.get_api()
