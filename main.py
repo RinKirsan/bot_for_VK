@@ -120,3 +120,4 @@ def main():
                     break
 
 main()
+vk.wall.post(owner_id='-224970403', message='Test')

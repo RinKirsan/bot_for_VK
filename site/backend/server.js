@@ -7,6 +7,8 @@ const fs = require('fs');
 const app = express();
 const port = 3000;
 
+
+
 // Установка сессий
 app.use(session({
     secret: 'mySecretKey',
@@ -77,22 +79,61 @@ app.post('/publish', isAuthenticated, (req, res) => {
         return res.status(400).send('No selected items or invalid data format.');
     }
 
-    // Создание нового workbook
-    const newWorkbook = xlsx.utils.book_new();
-    const newSheet = xlsx.utils.aoa_to_sheet([[ 'Text' ,'Image']]);
-    xlsx.utils.book_append_sheet(newWorkbook, newSheet, 'Sheet1');
+    // Чтение существующего файла new_data.xlsx
+    const existingWorkbook = xlsx.readFile(path.join(__dirname, '..', 'new_data.xlsx'));
+    const existingSheet = existingWorkbook.Sheets[existingWorkbook.SheetNames[0]];
 
-    // Заполнение нового листа данными
+    // Заполнение новых данных в существующем листе
     selectedItems.forEach(item => {
         const { image, text } = item;
-        xlsx.utils.sheet_add_aoa(newSheet, [[text, image]], { origin: -1 });
+        const rowIndex = existingSheet['!rows'] ? existingSheet['!rows'].length : 0;
+        xlsx.utils.sheet_add_aoa(existingSheet, [[text, image]], { origin: -1, rowIndex: rowIndex });
     });
 
-    // Сохранение нового файла XLSX
-    const filePath = path.join(__dirname, '..', 'new_data.xlsx');
-    xlsx.writeFile(newWorkbook, filePath);
+    // Сохранение изменений в существующем файле new_data.xlsx
+    xlsx.writeFile(existingWorkbook, path.join(__dirname, '..', 'new_data.xlsx'));
 
-    res.json({ message: 'Data saved successfully.', filePath: filePath });
+    // Удаление выбранных данных из data.xlsx
+    const dataWorkbook = xlsx.readFile(path.join(__dirname, '..', 'data.xlsx'));
+    const dataSheet = dataWorkbook.Sheets[dataWorkbook.SheetNames[0]];
+    selectedItems.forEach(item => {
+        const { text } = item;
+        for (const cellAddress in dataSheet) {
+            if (cellAddress.startsWith('A') && dataSheet[cellAddress].v === text) {
+                const rowNumber = parseInt(cellAddress.substring(1));
+                delete dataSheet[`A${rowNumber}`];
+                delete dataSheet[`B${rowNumber}`];
+                break; // выходим из цикла, после удаления одной строки
+            }
+        }
+    });
+    // Сохранение изменений в data.xlsx
+    xlsx.writeFile(dataWorkbook, path.join(__dirname, '..', 'data.xlsx'));
+
+    res.json({ message: 'Data saved successfully.', newFilePath: path.join(__dirname, '..', 'new_data.xlsx') });
+});
+
+
+app.post('/del', isAuthenticated, (req, res) => {
+    const { selectedItems } = req.body;
+    // Удаление выбранных данных из data.xlsx
+    const dataWorkbook = xlsx.readFile(path.join(__dirname, '..', 'data.xlsx'));
+    const dataSheet = dataWorkbook.Sheets[dataWorkbook.SheetNames[0]];
+    selectedItems.forEach(item => {
+        const { text } = item;
+        for (const cellAddress in dataSheet) {
+            if (cellAddress.startsWith('A') && dataSheet[cellAddress].v === text) {
+                const rowNumber = parseInt(cellAddress.substring(1));
+                delete dataSheet[`A${rowNumber}`];
+                delete dataSheet[`B${rowNumber}`];
+                break; // выходим из цикла, после удаления одной строки
+            }
+        }
+    });
+    // Сохранение изменений в data.xlsx
+    xlsx.writeFile(dataWorkbook, path.join(__dirname, '..', 'data.xlsx'));
+    
+    res.json({ message: 'Data saved successfully.', newFilePath: path.join(__dirname, '..', 'new_data.xlsx') });
 });
 
 

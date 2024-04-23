@@ -74,3 +74,28 @@ function publishToVK() {
     .catch(error => console.error('Error publishing to VK:', error));
 }
 
+
+function deleteSelected() {
+    // Get all selected checkboxes
+    const selectedCheckboxes = document.querySelectorAll('input[name=selectedItem]:checked');
+    
+    // Collect the values of selected checkboxes
+    const selectedItems = Array.from(selectedCheckboxes).map(checkbox => JSON.parse(checkbox.value)); // Парсим JSON строку обратно в объект
+
+    // Make a POST request to your backend with selected items
+    fetch('http://localhost:3000/del', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ selectedItems: selectedItems })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Deleting:', data);
+    })
+    .catch(error => console.error('Error Deleting:', error));
+}
+ 
+
+
