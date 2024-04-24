@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
+    openVKAuthDialog();
     fetchData(); // Fetch data when the page loads
 });
 
@@ -96,6 +97,7 @@ function deleteSelected() {
     })
     .catch(error => console.error('Error Deleting:', error));
 }
+
  
 
 

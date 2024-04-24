@@ -4,7 +4,16 @@ const path = require('path');
 const xlsx = require('xlsx');
 const bodyParser = require('body-parser');
 const fs = require('fs');
+const https = require('https');
+const fs = require('fs');
+
+const options = {
+    key: fs.readFileSync('key.pem'),
+    cert: fs.readFileSync('cert.pem')
+};
+
 const app = express();
+
 const port = 3000;
 
 
@@ -144,7 +153,10 @@ app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 app.use(express.static(path.join(__dirname, '..', 'images')));
 
-// Запуск сервера
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+https.createServer(options, app).listen(443, () => {
+    console.log(`Server is running on port 443`);
 });
+// Запуск сервера
+/*app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});*/
