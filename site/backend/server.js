@@ -160,5 +160,6 @@ app.use(express.static(path.join(__dirname, '..', 'images')));
 
 // Запуск сервера
 app.listen(port, () => {
+    console.log(`http://localhost:${port}/`);
     console.log(`Server is running on port ${port}`);
 });
