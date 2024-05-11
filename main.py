@@ -96,6 +96,8 @@ token_file = open('C:\\1\\token1.txt')
 vk_session = vk_api.VkApi(token=token_file.read())
 token_file.close()
 vk = vk_session.get_api()
+vk_session1 = vk_api.VkApi(token='')
+vk1 = vk_session1.get_api()
 longpoll = VkLongPoll(vk_session)
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -120,4 +122,4 @@ def main():
                     break
 
 main()
-vk.wall.post(owner_id='-224970403', message='Test')
+vk1.wall.post(owner_id='-224970403', message='Test')
