@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
-    openVKAuthDialog();
+    //openVKAuthDialog();
     fetchData(); // Fetch data when the page loads
 });
 
@@ -18,7 +18,6 @@ function displayData(data) {
     const imageListDiv = document.getElementById('imageList');
     imageListDiv.innerHTML = '';
 
-    // Iterate through data and create HTML elements for each item
     data.forEach(item => {
         const div = document.createElement('div');
         div.classList.add('item-container'); // Добавляем класс для стилизации через CSS
