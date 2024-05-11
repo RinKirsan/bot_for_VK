@@ -3,16 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Изображения и текст</title>
+    <title>Очередь вакансий</title>
     <link rel="stylesheet" href="styles.css">
 </head>
+
+
 <body>
+    <header class="main-header">
+        <nav class="main-nav">
+            <a class="logo" href="#">
+                <img src="./cont/logo.jpg">
+            </a>
+        </nav>
+    </header>
+   
+    
+
+<main>
     <div class="container">
-        <h1>Список изображений и текста</h1>
+        <h2>Список вакансий в очереди</h2>
         <div id="imageList"></div>
-        <button onclick="publishToVK()">Опубликовать в VK</button>
-        <button onclick="deleteSelected()">Удалить выбранные</button>
+        <button class="f1"  onclick="publishToVK()">Опубликовать в VK</button>
+        <button class="f2"  onclick="deleteSelected()">Удалить выбранные</button>
     </div>
+</main>
+
+<footer class="main-footer">
+    <a href="https://vk.com/rin.kirsan">Связяться с разработчиком</a>
+</footer>
 
     <script src="script.js"></script>
 </body>
