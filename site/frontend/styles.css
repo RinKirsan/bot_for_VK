@@ -17,6 +17,42 @@ input[type="checkbox"] {
 }
 
 
+.logo img {
+    width: 200px;
+    height: auto;
+    border: none;
+    display: block;
+    margin: 0 auto;
+}
+
+
+button{
+    background-color: #ffffff; 
+    width: 120px; 
+    height: 40px; 
+    border-radius: 11px; 
+    font-size: 13px;
+}
+
+button:active {
+    background-color: #cccccc; /* Новый цвет кнопки при нажатии */
+}
+
+button:hover {
+    background-color: #1F6AD0; 
+}
+
+.f1:hover{
+    background-color: #1F6AD0; 
+}
+
+.f2:hover{
+    background-color: #d01f1f; 
+}
+
+.main-footer{
+    text-align: center;
+}
 
 .item-container {
     display: flex;
