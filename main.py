@@ -131,18 +131,23 @@ def main():
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW:
             if event.to_me:
-
                 msg =event.text.lower()
                 id = event.user_id
-                
+
+                if id == 577763695:
+                    adminValid = True
+                else:
+                    adminValid = False
+
                 if event.text.lower().startswith('!рек'):
                     command = msg.split()[1]
                     handle_command(id, command)
-                elif msg =='!id':
+                elif (msg =='!id') & adminValid:
                     send_message(id,id)
-                elif msg == '!нач':
+                elif msg == 'начало':
                     handle_advertisement(id, event)
-                elif msg == 'кон':
+                elif (msg == 'кон') & adminValid:
+                    send_message(577763695,"Работа бота остановлена")
                     break
 
 main()
