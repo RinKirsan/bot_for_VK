@@ -68,6 +68,20 @@ def handle_command(user_id, command):
 
 # Функция для обработки рекламы
 def handle_advertisement(user_id, event):
+    # Отправляем сообщение с вопросами пользователю
+    send_message(user_id, message="Для сохранения объявления, пожалуйста, ответьте на вопросы.")
+
+    # Ожидаем ответа пользователя
+    organization_name = "\n" + wait_for_user_response(user_id, "Введите название организации:")
+    website_link = "\n" + wait_for_user_response(user_id, "Введите ссылку на сайт:")
+    job_title = "\n" + wait_for_user_response(user_id, "Введите название вакансии:")
+    job_function = "\n" + wait_for_user_response(user_id, "Введите функционал:")
+    job_requirements = "\n" + wait_for_user_response(user_id, "Введите требования к соискателю:")
+    job_conditions = "\n" + wait_for_user_response(user_id, "Введите условия работы:")
+    contact_info = "\n" + wait_for_user_response(user_id, "Введите контакты для отклика:")
+    send_message(user_id, "Прикрепите картинку.")
+
+    # После получения всех ответов обрабатываем вложение
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW and event.to_me:
             attachments = vk.messages.getById(message_ids=event.message_id, extended=True, fields='attachments')['items'][0]['attachments']
@@ -76,10 +90,11 @@ def handle_advertisement(user_id, event):
                 if attachment['type'] == 'photo':
                     photo = attachment['photo']
                     photo_link = event.attachments['attach1']
+                    finalText = organization_name + website_link + job_title + job_function + job_requirements + job_conditions + contact_info
                     #save_to_excel(event.text, photo_link)
-                    download_photo(event.text, photo_link, photo, "photo.jpg")
+                    download_photo(finalText, photo_link, photo, "photo.jpg")
                     #download_photo(event.text, photo_link, photo, "photo.png")
-                    send_message(user_id, message="Объявление сохранено")
+                    send_message(user_id, message="Ваша вакансия на модерации.\nПросим заметить, что для нас приоритетными являются вакансии, напрямую связанные с направлениями подготовки, реализуемые в университете.")
                     break
                 else:
                     send_message(user_id, "Найдено вложение другого типа")
@@ -88,6 +103,16 @@ def handle_advertisement(user_id, event):
                 send_message(user_id, "Вложений не обнаружено.")
                 break
 
+
+def wait_for_user_response(user_id, prompt_message):
+    # Отправляем сообщение с запросом пользователю и ожидаем его ответа
+    send_message(user_id, message=prompt_message)
+    
+    # Получаем ответ от пользователя
+    for event in longpoll.listen():
+        if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.user_id == user_id:
+            send_message(user_id, "ответ записан")
+            return event.text.strip()  # Возвращаем текст ответа пользователя
 
 
 
@@ -116,7 +141,6 @@ def main():
                 elif msg =='!id':
                     send_message(id,id)
                 elif msg == '!нач':
-                    send_message(id, "Введите описание и прикрепите фотографию.\nФотографию и описание следует отправлять вместе, одним сообщением.")
                     handle_advertisement(id, event)
                 elif msg == 'кон':
                     break
