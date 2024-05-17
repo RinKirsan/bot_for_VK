@@ -139,7 +139,7 @@ def main():
                 else:
                     adminValid = False
 
-                if event.text.lower().startswith('!рек'):
+                if event.text.lower().startswith('!рек')& adminValid:
                     command = msg.split()[1]
                     handle_command(id, command)
                 elif (msg =='!id') & adminValid:
