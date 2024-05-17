@@ -103,8 +103,10 @@ def publ_post():
                 # Опубликование поста с фото
                 vk_session_post.method("wall.post", {
                     "owner_id": id_group,
+                    "from_group": 1,
                     "message": text,
                     "attachments": photo_attachment
+
                 })
                 vk_post.wall.post
                 print(f"Пост опубликован: Текст - {text}, Фото - {photo_path}")
