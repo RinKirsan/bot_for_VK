@@ -4,6 +4,9 @@ import pandas as pd
 from openpyxl import Workbook, load_workbook
 import os
 import requests
+import threading
+import time
+
 
 
 # Функция для сохранения данных в таблицу Excel
@@ -66,6 +69,53 @@ def handle_command(user_id, command):
 
 
 
+def publ_post():
+    while True:
+        # Чтение данных из файла Excel
+        df = pd.read_excel('site\\new_data.xlsx')
+        if not df.empty:
+            # Получение данных из первой строки
+            text = df.iloc[0]['Text']
+            photo_path = "site\images\\" + df.iloc[0]['Image']
+            
+            # Удаление первой строки из DataFrame
+            df = df.drop(0).reset_index(drop=True)
+            # Сохранение изменений обратно в файл Excel
+            df.to_excel('site\\new_data.xlsx', index=False)
+
+            try:
+                # Получаем URL для загрузки фото
+                upload_url = vk_session_post.method('photos.getWallUploadServer')['upload_url']
+                
+                # Загружаем фото на сервер
+                with open(photo_path, 'rb') as file:
+                    response = requests.post(upload_url, files={'photo': file}).json()
+
+                # Сохраняем фото на сервере ВКонтакте
+                photo = vk_session_post.method('photos.saveWallPhoto', {
+                    'photo': response['photo'],
+                    'server': response['server'],
+                    'hash': response['hash']
+                })[0]
+
+                photo_attachment = f"photo{photo['owner_id']}_{photo['id']}"
+
+                # Опубликование поста с фото
+                vk_session_post.method("wall.post", {
+                    "owner_id": id_group,
+                    "message": text,
+                    "attachments": photo_attachment
+                })
+                vk_post.wall.post
+                print(f"Пост опубликован: Текст - {text}, Фото - {photo_path}")
+            except Exception as e:
+                print(f"Ошибка при загрузке фото или публикации поста: {e}")
+        else:
+            print("Файл Excel пустой. Повторная попытка через 10 минут.")
+            time.sleep(60)  # Задержка выполнения на 10 минут (600 секунд)
+
+
+
 # Функция для обработки рекламы
 def handle_advertisement(user_id, event):
     # Отправляем сообщение с вопросами пользователю
@@ -91,9 +141,7 @@ def handle_advertisement(user_id, event):
                     photo = attachment['photo']
                     photo_link = event.attachments['attach1']
                     finalText = organization_name + website_link + job_title + job_function + job_requirements + job_conditions + contact_info
-                    #save_to_excel(event.text, photo_link)
                     download_photo(finalText, photo_link, photo, "photo.jpg")
-                    #download_photo(event.text, photo_link, photo, "photo.png")
                     send_message(user_id, message="Ваша вакансия на модерации.\nПросим заметить, что для нас приоритетными являются вакансии, напрямую связанные с направлениями подготовки, реализуемые в университете.")
                     break
                 else:
@@ -111,7 +159,7 @@ def wait_for_user_response(user_id, prompt_message):
     # Получаем ответ от пользователя
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW and event.to_me and event.user_id == user_id:
-            send_message(user_id, "ответ записан")
+            send_message(user_id, "Ответ записан.")
             return event.text.strip()  # Возвращаем текст ответа пользователя
 
 
@@ -121,11 +169,30 @@ token_file = open('C:\\1\\token1.txt')
 vk_session = vk_api.VkApi(token=token_file.read())
 token_file.close()
 vk = vk_session.get_api()
-vk_session1 = vk_api.VkApi(token='')
-vk1 = vk_session1.get_api()
 longpoll = VkLongPoll(vk_session)
 
+token_file_post = open('C:\\1\\token2.txt')
+vk_session_post = vk_api.VkApi(token=token_file_post.read())
+token_file_post.close()
+vk_post = vk_session_post.get_api()
+
+admin_id_file = open('C:\\1\\admin.txt')
+id_admin = admin_id_file.read()
+admin_id_file.close()
+
+group_id_file = open('C:\\1\\id_group.txt')
+id_group = group_id_file.read()
+group_id_file.close()
+
+
 current_dir = os.path.dirname(os.path.abspath(__file__))
+
+stop_flag = threading.Event()
+
+def publication():
+    while not stop_flag.is_set():
+        time.sleep(2.5)
+        publ_post()
 
 def main():
     for event in longpoll.listen():
@@ -134,7 +201,7 @@ def main():
                 msg =event.text.lower()
                 id = event.user_id
 
-                if id == 577763695:
+                if id == id_admin:
                     adminValid = True
                 else:
                     adminValid = False
@@ -147,8 +214,15 @@ def main():
                 elif msg == 'начало':
                     handle_advertisement(id, event)
                 elif (msg == 'кон') & adminValid:
+                    stop_flag.set()
+                    # Ожидаем завершения потока
+                    thread_pub.join()
+                    print("Поток остановлен")
                     send_message(577763695,"Работа бота остановлена")
                     break
 
+# Создаем поток для функции publication
+thread_pub = threading.Thread(target=publication)
+# Запускаем поток
+thread_pub.start()
 main()
-vk1.wall.post(owner_id='-224970403', message='Test')
