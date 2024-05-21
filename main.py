@@ -190,9 +190,6 @@ def main():
                 else:
                     adminValid = False
 
-                # if event.text.lower().startswith('!рек')& adminValid:
-                #     command = msg.split()[1]
-                #     handle_command(id, command)
                 if (msg =='!id') & adminValid:
                     send_message(id,id)
                 elif msg == 'начало':
