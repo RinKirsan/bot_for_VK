@@ -7,8 +7,6 @@ import requests
 import threading
 import time
 
-
-
 # Функция для сохранения данных в таблицу Excel
 def save_to_excel(text, photo_link):
     wb = load_workbook('site\data.xlsx')
@@ -52,22 +50,6 @@ def send_message(user_id, message):
         message=message,
         random_id=vk_api.utils.get_random_id(),
     )
-
-# Функция для обработки команды !рек
-def handle_command(user_id, command):
-    try:
-        index = int(command)
-        df = pd.read_excel('site\data.xlsx')
-        if not df.empty and index <= len(df):
-            text = df.iloc[index - 1]['text']
-            photo_link = df.iloc[index - 1]['image']
-            send_message(user_id, f"Текст рекламы: {text}\nСсылка на картинку: {photo_link}")
-        else:
-            send_message(user_id, "Указанная строка не найдена.")
-    except ValueError:
-        send_message(user_id, "Необходимо указать номер строки после команды !рек.")
-
-
 
 def publ_post():
     while True:
@@ -208,10 +190,10 @@ def main():
                 else:
                     adminValid = False
 
-                if event.text.lower().startswith('!рек')& adminValid:
-                    command = msg.split()[1]
-                    handle_command(id, command)
-                elif (msg =='!id') & adminValid:
+                # if event.text.lower().startswith('!рек')& adminValid:
+                #     command = msg.split()[1]
+                #     handle_command(id, command)
+                if (msg =='!id') & adminValid:
                     send_message(id,id)
                 elif msg == 'начало':
                     handle_advertisement(id, event)
