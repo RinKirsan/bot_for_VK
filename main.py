@@ -220,7 +220,7 @@ def main():
                     # Ожидаем завершения потока
                     thread_pub.join()
                     print("Поток остановлен")
-                    send_message(577763695,"Работа бота остановлена")
+                    send_message(id_admin,"Работа бота остановлена")
                     break
 
 # Создаем поток для функции publication
