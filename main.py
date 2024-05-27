@@ -161,7 +161,7 @@ token_file_post.close()
 vk_post = vk_session_post.get_api()
 
 admin_id_file = open('C:\\1\\admin.txt')
-id_admin = admin_id_file.read()
+id_admin = int(admin_id_file.read().strip())
 admin_id_file.close()
 
 group_id_file = open('C:\\1\\id_group.txt')
@@ -172,17 +172,26 @@ group_id_file.close()
 current_dir = os.path.dirname(os.path.abspath(__file__))
 
 stop_flag = threading.Event()
+flag_ping = False
+
+def ping():
+    while not stop_flag.is_set():
+        if flag_ping == True:
+            send_message(id_admin,"проверка связи, связь установлена")
+        time.sleep(5)
 
 def publication():
     while not stop_flag.is_set():
         time.sleep(2.5)
         publ_post()
 
+
 def main():
+    global flag_ping
     for event in longpoll.listen():
         if event.type == VkEventType.MESSAGE_NEW:
             if event.to_me:
-                msg =event.text.lower()
+                msg = event.text.lower()
                 id = event.user_id
 
                 if id == id_admin:
@@ -190,15 +199,21 @@ def main():
                 else:
                     adminValid = False
 
-                if (msg =='!id') & adminValid:
+                if (msg =='!id') and adminValid:
                     send_message(id,id)
                 elif msg == 'начало':
                     handle_advertisement(id, event)
-                elif (msg == 'кон') & adminValid:
+                elif (msg == 'пинг') and adminValid:
+                    if flag_ping == False:
+                        send_message(id_admin,"идёт проверка связи")
+                        flag_ping = True
+                    else: flag_ping = False
+                elif (msg == 'кон') and adminValid:
                     stop_flag.set()
                     # Ожидаем завершения потока
                     thread_pub.join()
-                    print("Поток остановлен")
+                    thread_ping.join()
+                    print("Потоки остановлены")
                     send_message(id_admin,"Работа бота остановлена")
                     break
 
@@ -206,4 +221,7 @@ def main():
 thread_pub = threading.Thread(target=publication)
 # Запускаем поток
 thread_pub.start()
+
+thread_ping = threading.Thread(target=ping)
+thread_ping.start()
 main()
