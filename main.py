@@ -52,7 +52,7 @@ def send_message(user_id, message):
     )
 
 def publ_post():
-    while True:
+    #while True:
         # Чтение данных из файла Excel
         df = pd.read_excel('site\\new_data.xlsx')
         if not df.empty:
@@ -96,7 +96,7 @@ def publ_post():
                 print(f"Ошибка при загрузке фото или публикации поста: {e}")
         else:
             print("Файл Excel пустой. Повторная попытка через 10 минут.")
-            time.sleep(60)  # Задержка выполнения на 10 минут (600 секунд)
+           
 
 
 
@@ -178,13 +178,13 @@ def ping():
     while not stop_flag.is_set():
         if flag_ping == True:
             send_message(id_admin,"проверка связи, связь установлена")
-        time.sleep(5)
+        time.sleep(15)
 
 def publication():
     while not stop_flag.is_set():
-        time.sleep(2.5)
         publ_post()
-
+        time.sleep(60)  # Задержка выполнения на 10 минут (600 секунд)
+        
 
 def main():
     global flag_ping
@@ -203,12 +203,15 @@ def main():
                     send_message(id,id)
                 elif msg == 'начало':
                     handle_advertisement(id, event)
-                elif (msg == 'пинг') and adminValid:
-                    if flag_ping == False:
-                        send_message(id_admin,"идёт проверка связи")
+                elif (msg == 'пинг')and adminValid:
+                    if flag_ping == True:
+                        flag_ping = False
+                        send_message(id_admin,"Проверка закончена")
+                    else:
                         flag_ping = True
-                    else: flag_ping = False
-                elif (msg == 'кон') and adminValid:
+                        send_message(id_admin,"Проверка начата")
+                elif (msg == 'кон')and adminValid:
+                    print("Начата процедура остановки")
                     stop_flag.set()
                     # Ожидаем завершения потока
                     thread_pub.join()
